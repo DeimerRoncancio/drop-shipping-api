@@ -4,8 +4,8 @@ import java.util.List;
 
 import com.drop.shiping.api.drop_shiping_api.common.validation.IfExists;
 import com.drop.shiping.api.drop_shiping_api.common.validation.ImageFormat;
-import com.drop.shiping.api.drop_shiping_api.products.entities.Variant;
 import com.drop.shiping.api.drop_shiping_api.products.validation.ExistingCategories;
+import jakarta.validation.Valid;
 import org.springframework.data.annotation.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -36,26 +36,22 @@ public record ProductDTO(
     @JsonIgnoreProperties({"id", "products"})
     List<ProductCategory> categories,
 
-    @JsonIgnoreProperties({"id", "values", "tag"})
-    List<Variant> variants,
+    @Valid
+    List<VariantDTO> variants,
 
-    @Transient
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    List<String> variantsToRemove,
+
     @ImageFormat(maxSize = 3 * 1024 * 1024)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     List<MultipartFile> images,
 
-    @Transient
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     List<String> imagesToRemove,
 
-    @Transient
     @ExistingCategories(message = "{IfExists.category.name}")
     @NotEmpty(message = "{NotEmpty.validation.list}")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    List<String> categoriesList,
-
-    @Transient
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    List<String> variantsList
+    List<String> categoriesList
 ) {
 }

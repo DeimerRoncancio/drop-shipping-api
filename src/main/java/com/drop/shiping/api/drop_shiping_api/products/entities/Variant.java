@@ -19,17 +19,13 @@ public class Variant {
     @Column(name = "variant_values")
     private String values;
 
-    @ManyToMany(mappedBy = "variants")
-    private List<Product> products;
+    public Variant() {}
 
-    public Variant() {
-    }
-
-    public Variant(String id, String name, String values, String tag) {
-        this.id = id;
+    public Variant(String name, String tag, String values, String type) {
         this.name = name;
         this.values = values;
         this.tag = tag;
+        this.type = type;
     }
 
     public String getId() {
@@ -62,14 +58,6 @@ public class Variant {
 
     public void setTag(String tag) {
         this.tag = tag;
-    }
-
-    public List<Product> getProducts() {
-        return products;
-    }
-
-    public void setProducts(List<Product> products) {
-        this.products = products;
     }
 
     public String getType() {

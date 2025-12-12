@@ -34,14 +34,12 @@ public class Product {
     @JoinTable(
         name = "images_to_products",
         joinColumns = @JoinColumn(name = "id_product"),
-        inverseJoinColumns = @JoinColumn(name = "id_image"))
+        inverseJoinColumns = @JoinColumn(name = "id_image"),
+        uniqueConstraints = @UniqueConstraint(columnNames = "id_image"))
     private List<Image> productImages;
 
-    @ManyToMany
-    @JoinTable(
-        name = "variants_to_products",
-        joinColumns = @JoinColumn(name = "id_product"),
-        inverseJoinColumns = @JoinColumn(name = "id_variant"))
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "product_id")
     private List<Variant> variants;
 
     @ManyToMany

@@ -5,6 +5,7 @@ import com.drop.shiping.api.drop_shiping_api.products.dtos.ProductDTO;
 import com.drop.shiping.api.drop_shiping_api.products.dtos.ProductResponseDTO;
 import com.drop.shiping.api.drop_shiping_api.products.dtos.VariantDTO;
 import com.drop.shiping.api.drop_shiping_api.products.entities.Variant;
+import com.drop.shiping.api.drop_shiping_api.products.mappers.VariantMapper;
 import com.drop.shiping.api.drop_shiping_api.products.services.ProductCategoryService;
 import com.drop.shiping.api.drop_shiping_api.products.services.ProductService;
 import com.drop.shiping.api.drop_shiping_api.products.services.VariantService;
@@ -49,7 +50,7 @@ public class ProductServiceImpl implements ProductService {
         return repository.findAll(pageable).map(product -> {
             List<VariantDTO> variants = product.getVariants().stream().map(var -> {
                 List<String> values = List.of(var.getValues().split("\\|"));
-                return new VariantDTO(var.getName(), var.getType(), var.getTag(), values);
+                return new VariantDTO(var.getId(), var.getName(), var.getType(), var.getTag(), values);
             }).toList();
 
             return ProductMapper.MAPPER.productToResponseDTO(product, variants);
@@ -63,7 +64,7 @@ public class ProductServiceImpl implements ProductService {
         return repository.findById(id).map(product -> {
             List<VariantDTO> variants = product.getVariants().stream().map(variant -> {
                 List<String> values = List.of(variant.getValues().split("\\|"));
-                return new VariantDTO(variant.getName(), variant.getType(), variant.getTag(), values);
+                return new VariantDTO(variant.getId(), variant.getName(), variant.getType(), variant.getTag(), values);
             }).toList();
 
             return ProductMapper.MAPPER.productToResponseDTO(product, variants);
@@ -73,10 +74,12 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductDTO save(ProductDTO dto) {
-        Product product = ProductMapper.MAPPER.productDTOtoProduct(dto);
+        List<Variant> variants = dto.variants().stream().map(variantDto -> {
+            String listValues = String.join("|", variantDto.listValues());
+            return new Variant(variantDto.name(), variantDto.tag(), listValues, variantDto.type());
+        }).toList();
 
-        List<Variant> variantList = variantService.findVariantsByName(dto.variantsList());
-        product.setVariants(variantList);
+        Product product = ProductMapper.MAPPER.productDTOtoProduct(dto, variants);
 
         List<ProductCategory> categoryList =  categoryService.findCategoriesByName(dto.categoriesList());
         product.setCategories(categoryList);
@@ -95,19 +98,16 @@ public class ProductServiceImpl implements ProductService {
     public Optional<ProductDTO> update(String id, ProductDTO dto) {
         return repository.findById(id).map(productDb -> {
             List<ProductCategory> categoriesDb = categoryService.findCategoriesByName(dto.categoriesList());
-            List<Variant> variantsDb = variantService.findVariantsByName(dto.variantsList());
 
             List<ProductCategory> productCategories = updateCategories(
                 productDb.getCategories(), categoriesDb);
 
-            List<Variant> productVariants = updateVariants(
-                productDb.getVariants(), variantsDb);
+            updateVariants(productDb.getVariants(), dto.variants(), dto.variantsToRemove());
 
             List<Image> productImages = updateImages(
                 productDb.getProductImages(), dto.images(), dto.imagesToRemove());
 
             productDb.setCategories(productCategories);
-            productDb.setVariants(productVariants);
             productDb.setProductImages(productImages);
             ProductMapper.MAPPER.toUpdateProduct(dto, productDb);
 
@@ -173,14 +173,32 @@ public class ProductServiceImpl implements ProductService {
         return currentCategories;
     }
 
-    public List<Variant> updateVariants(List<Variant> currentVariants, List<Variant> variants) {
-        currentVariants.removeIf(var -> !variants.contains(var));
+    public void updateVariants(List<Variant> currentVariants, List<VariantDTO> variants, List<String> variantsToRemove) {
+        if (variantsToRemove != null && !variantsToRemove.isEmpty())
+            currentVariants.removeIf(var -> variantsToRemove.contains(var.getId()));
 
-        variants.stream()
-            .filter(var -> !currentVariants.contains(var))
-            .forEach(currentVariants::add);
+        if (variants == null || variants.isEmpty()) return;
+        for (VariantDTO dto : variants) {
+            if (dto.id() == null || dto.id().isEmpty()) {
+                String values = String.join("|", dto.listValues());
+                Variant newVariant = VariantMapper.MAPPER.dtoToVariant(dto, values);
 
-        return currentVariants;
+                currentVariants.add(newVariant);
+            } else {
+                Optional<Variant> variantOp = currentVariants.stream()
+                    .filter(var -> var.getId().equals(dto.id()))
+                    .findFirst();
+
+                variantOp.ifPresent(variant -> {
+                    String values = String.join("|", dto.listValues());
+
+                    variant.setName(dto.name());
+                    variant.setTag(dto.tag());
+                    variant.setType(dto.type());
+                    variant.setValues(values);
+                });
+            }
+        }
     }
 
     public void deleteImage(Image image) {

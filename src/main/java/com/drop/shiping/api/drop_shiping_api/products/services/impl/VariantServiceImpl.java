@@ -46,8 +46,8 @@ public class VariantServiceImpl implements VariantService {
     @Override
     @Transactional
     public VariantDTO addVariant(VariantDTO newVariant) {
-        String values = String.join("|", newVariant.listValues());
-        repository.save(VariantMapper.MAPPER.dtoToVariant(newVariant, values));
+//        String values = String.join("|", newVariant.listValues());
+//        repository.save(VariantMapper.MAPPER.dtoToVariant(newVariant, values));
         return newVariant;
     }
 
@@ -55,11 +55,11 @@ public class VariantServiceImpl implements VariantService {
     @Transactional
     public Optional<VariantDTO> updateVariant(String id, VariantDTO variantDTO){
         return repository.findById(id).map(variantDb -> {
-            String values = String.join("|", variantDTO.listValues());
+//            String values = String.join("|", variantDTO.listValues());
 
             variantDb.setName(variantDTO.name());
             variantDb.setTag(variantDTO.tag());
-            variantDb.setValues(values);
+//            variantDb.setValues(values);
             repository.save(variantDb);
 
             return variantDTO;

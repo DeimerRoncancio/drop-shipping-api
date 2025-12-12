@@ -8,6 +8,8 @@ import org.springframework.data.annotation.Transient;
 import java.util.List;
 
 public record VariantDTO(
+    String id,
+
     @NotBlank(message = "{NotBlank.validation.text}")
     @IfExists(field = "name", entity = "Variant")
     String name,
@@ -18,7 +20,6 @@ public record VariantDTO(
     @NotBlank(message = "{NotBlank.validation.text}")
     String tag,
 
-    @Transient
     @NotEmpty(message = "{NotEmpty.validation.list}")
     List<String> listValues
 ) {
