@@ -4,6 +4,7 @@ import com.drop.shiping.api.drop_shiping_api.payments.dtos.EpaycoWebhookDTO;
 import com.drop.shiping.api.drop_shiping_api.payments.services.PaymentService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClient;
@@ -55,6 +56,8 @@ public class PaymentController {
         body.put("lang", "ES");
         body.put("ip", "201.245.254.45");
         body.put("test", "true");
+        body.put("confirmation", "https://charriest-semiclinically-julienne.ngrok-free.dev/app/payments/confirmation");
+        body.put("response", "https://hkdk.events/ha64xsf25bn8lv");
         body.put("methodconfirmation", "POST");
 
         return restClient.post()
@@ -65,10 +68,11 @@ public class PaymentController {
                 .body(String.class);
     }
 
-    @PostMapping("/confirmation")
-    public ResponseEntity<String> handleWebhook(@RequestBody EpaycoWebhookDTO request) {
+    @PostMapping(
+    value = "/confirmation",
+    consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<String> handleWebhook(@ModelAttribute EpaycoWebhookDTO request) {
         try {
-            System.out.println("Llega aquí");
             if (!paymentService.validateSignature(request))
                 return ResponseEntity.badRequest().body("Firma invalida");
 

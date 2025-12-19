@@ -27,12 +27,12 @@ public class PaymentServiceImpl implements PaymentService {
     public boolean validateSignature(EpaycoWebhookDTO request) {
         try {
             String signatureString = String.format("%s^%s^%s^%s^%s^%s",
-                epaycoCustomerId,
-                epaycoKey,
-                request.xRefPayco(),
-                request.xTransactionId(),
-                request.xAmount(),
-                request.xCurrencyCode()
+                epaycoCustomerId.trim(),
+                epaycoKey.trim(),
+                request.x_ref_payco().split(",")[0].trim(),
+                request.x_transaction_id().split(",")[0].trim(),
+                request.x_amount().split(",")[0].trim(),
+                request.x_currency_code().split(",")[0].trim()
             );
 
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -40,7 +40,9 @@ public class PaymentServiceImpl implements PaymentService {
 
             String calculatedSignature = bytesToHex(hash);
 
-            return calculatedSignature.equals(request.xSignature());
+            String receivedSignature = request.x_signature().split(",")[0].trim();
+
+            return calculatedSignature.equals(receivedSignature);
 
         } catch(NoSuchElementException | NoSuchAlgorithmException err) {
             log.debug("Error calculando firma SHA-256");
@@ -51,7 +53,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public void processWebhook(EpaycoWebhookDTO request) {
-        switch (request.xResponse()) {
+        switch (request.x_response().split(",")[0].trim()) {
             case "Aceptada": processApprovedTransaction(request);
                 break;
             case "Rechazada": processRejectTransaction(request);
@@ -85,14 +87,13 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private String bytesToHex(byte[] hash) {
-        StringBuilder hexString = new StringBuilder(2 * hash.length);
+        StringBuilder hexString = new StringBuilder();
         for (byte b : hash) {
             String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1) {
+            if (hex.length() == 1)
                 hexString.append('0');
-            }
             hexString.append(hex);
         }
-        return hexString.toString();
+        return hexString.toString(); // lowercase
     }
 }
