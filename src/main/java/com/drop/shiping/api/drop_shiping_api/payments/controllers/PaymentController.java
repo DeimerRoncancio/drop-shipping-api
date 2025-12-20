@@ -16,12 +16,8 @@ import java.util.Map;
 @RequestMapping("/app/payments")
 @CrossOrigin(originPatterns = "*")
 public class PaymentController {
-    private final RestClient restClient;
-
     private final PaymentService paymentService;
-
-    @Value("${epayco.url.payments}")
-    private String url;
+    private final RestClient restClient;
 
     @Value("${epayco.api.username}")
     private String username;
@@ -56,8 +52,8 @@ public class PaymentController {
         body.put("lang", "ES");
         body.put("ip", "201.245.254.45");
         body.put("test", "true");
-        body.put("confirmation", "https://charriest-semiclinically-julienne.ngrok-free.dev/app/payments/confirmation");
-        body.put("response", "https://hkdk.events/ha64xsf25bn8lv");
+//        body.put("confirmation", "https://charriest-semiclinically-julienne.ngrok-free.dev/app/payments/confirmation");
+        body.put("response", "https://charriest-semiclinically-julienne.ngrok-free.dev/payments/invoice");
         body.put("methodconfirmation", "POST");
 
         return restClient.post()

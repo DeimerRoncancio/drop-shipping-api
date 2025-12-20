@@ -1,7 +1,7 @@
 package com.drop.shiping.api.drop_shiping_api.users.entities;
 
 import com.drop.shiping.api.drop_shiping_api.images.entities.Image;
-import com.drop.shiping.api.drop_shiping_api.orders.entities.Order;
+import com.drop.shiping.api.drop_shiping_api.transactions.entities.Transaction;
 import org.hibernate.annotations.UuidGenerator;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -45,8 +45,7 @@ public class User {
     private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnoreProperties("user")
-    private List<Order> orders;
+    private List<Transaction> orders;
 
     @ManyToMany
     @JoinTable(
@@ -140,15 +139,15 @@ public class User {
         this.password = password;
     }
 
-    public List<Order> getOrders() {
+    public List<Transaction> getOrders() {
         return orders;
     }
 
-    public void setOrders(List<Order> orders) {
+    public void setOrders(List<Transaction> orders) {
         this.orders = orders;
     }
 
-    public void addOrder(List<Order> order) {
+    public void addOrder(List<Transaction> order) {
         order.forEach(ord -> {
             ord.setUser(this);
             orders.add(ord);
