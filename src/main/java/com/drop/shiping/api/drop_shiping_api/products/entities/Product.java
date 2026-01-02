@@ -117,4 +117,17 @@ public class Product {
     public void setVariants(List<Variant> variants) {
         this.variants = variants;
     }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id='" + id + '\'' +
+                ", productName='" + productName + '\'' +
+                ", description='" + description + '\'' +
+                ", price=" + price +
+                ", productImages=" + productImages +
+                ", variants=" + variants +
+                ", categories=" + categories +
+                '}';
+    }
 }

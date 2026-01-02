@@ -53,6 +53,8 @@ public class SpringSecurityConfig {
             .requestMatchers(HttpMethod.GET, "/app/users/token-validation").permitAll()
             .requestMatchers(HttpMethod.POST, "/app/users/register").permitAll()
             .requestMatchers(HttpMethod.GET, "/app/payments").permitAll()
+            .requestMatchers(HttpMethod.POST, "/app/transactions").permitAll()
+            .requestMatchers(HttpMethod.PUT, "/app/transactions/{identifier}").permitAll()
             .requestMatchers(HttpMethod.POST, "/app/payments/get-session").permitAll()
             .requestMatchers(HttpMethod.POST, "/app/payments/confirmation").permitAll()
             .anyRequest().authenticated())

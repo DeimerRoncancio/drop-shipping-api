@@ -22,6 +22,12 @@ public class ProductItem {
 
     public ProductItem() {}
 
+    public ProductItem(Transaction transaction, Product product, Integer quantity) {
+        this.transaction = transaction;
+        this.product = product;
+        this.quantity = quantity;
+    }
+
     public String getId() {
         return id;
     }

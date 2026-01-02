@@ -1,65 +1,94 @@
 package com.drop.shiping.api.drop_shiping_api.transactions.services;
 
+import com.drop.shiping.api.drop_shiping_api.products.entities.Product;
+import com.drop.shiping.api.drop_shiping_api.products.repositories.ProductRepository;
+import com.drop.shiping.api.drop_shiping_api.transactions.dtos.NewTransactionDTO;
 import com.drop.shiping.api.drop_shiping_api.transactions.dtos.OrderResponseDTO;
+import com.drop.shiping.api.drop_shiping_api.transactions.dtos.UserInfoDTO;
+import com.drop.shiping.api.drop_shiping_api.transactions.entities.ProductItem;
 import com.drop.shiping.api.drop_shiping_api.transactions.entities.Transaction;
 import com.drop.shiping.api.drop_shiping_api.transactions.mappers.TransactionMapper;
+import com.drop.shiping.api.drop_shiping_api.users.entities.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.drop.shiping.api.drop_shiping_api.users.entities.User;
-import com.drop.shiping.api.drop_shiping_api.transactions.dtos.NewOrderDTO;
 import com.drop.shiping.api.drop_shiping_api.transactions.dtos.UpdateOrderDTO;
 import com.drop.shiping.api.drop_shiping_api.transactions.repositories.TransactionRepository;
 import com.drop.shiping.api.drop_shiping_api.users.repositories.UserRepository;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository repository;
     private final UserRepository userRepository;
+    private final ProductRepository productRepository;
 
-    public TransactionServiceImpl(TransactionRepository repository, UserRepository userRepository) {
+    public TransactionServiceImpl(TransactionRepository repository, UserRepository userRepository,  ProductRepository productRepository) {
         this.repository = repository;
         this.userRepository = userRepository;
+        this.productRepository = productRepository;
     }
     
     @Override
     @Transactional(readOnly = true)
     public Page<OrderResponseDTO> findAll(Pageable pageable) {
-        Page<Transaction> orders = repository.findAll(pageable);
-        return orders.map(TransactionMapper.MAPPER::orderToResponseDTO);
+        Page<Transaction> transactions = repository.findAll(pageable);
+        return transactions.map(TransactionMapper.MAPPER::orderToResponseDTO);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Optional<OrderResponseDTO> findOne(String id) {
-        Optional<Transaction> order = repository.findById(id);
-        return order.map(TransactionMapper.MAPPER::orderToResponseDTO);
+        Optional<Transaction> transaction = repository.findById(id);
+        return transaction.map(TransactionMapper.MAPPER::orderToResponseDTO);
     }
 
     @Override
     @Transactional
-    public NewOrderDTO save(NewOrderDTO dto) {
-        Transaction order = TransactionMapper.MAPPER.orderCreateDTOtoOrder(dto);
+    public NewTransactionDTO addProductsInfo(NewTransactionDTO dto) {
+        Transaction transaction = new Transaction();
+        transaction.setTotalPrice(dto.totalPrice());
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String principal = (String) authentication.getPrincipal();
+        if (dto.userId() != null)
+            userRepository.findById(dto.userId()).ifPresent(transaction::setUser);
+        else
+            transaction.setUserReference(dto.userReference());
 
-        Optional<User> userOptional = userRepository.findByEmail(principal);
+        dto.products().forEach(product -> {
+            Optional<Product> productDB = productRepository.findById(product.productId());
+            ProductItem item = new ProductItem();
 
-        if (userOptional.isEmpty())
-            userOptional = userRepository.findByPhoneNumber(Long.parseLong(principal));
-        
-        order.setUser(userOptional.orElseThrow());
+            productDB.ifPresent(productItem -> {
+                item.setProduct(productItem);
+                item.setTransaction(transaction);
+                item.setQuantity(product.quantity());
+                transaction.getProducts().add(item);
+            });
+        });
 
-        repository.save(order);
+        repository.save(transaction);
         return dto;
+    }
+
+    @Override
+    @Transactional
+    public UserInfoDTO addUserInfo(String userId, UserInfoDTO userDTO) {
+        repository.findByUserId(userId).or(() -> repository.findByUserReference(userId))
+        .ifPresent(transaction -> {
+            transaction.setUserEmail(userDTO.userEmail());
+            transaction.setUserNames(userDTO.userNames());
+            transaction.setUserNumber(String.valueOf(userDTO.userNumber()));
+            transaction.setUserAddress(userDTO.userAddress());
+
+            repository.save(transaction);
+        });
+
+        return userDTO;
     }
 
     @Override

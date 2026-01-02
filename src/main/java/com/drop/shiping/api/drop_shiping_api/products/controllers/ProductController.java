@@ -35,7 +35,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponseDTO> view(@PathVariable String id) {
+    public ResponseEntity<ProductResponseDTO> view(@PathVariable("id") String id) {
         Optional<ProductResponseDTO> productDb = service.findOne(id);
         ProductResponseDTO product = productDb.orElseThrow(() -> new NotFoundException("Product not found"));
 

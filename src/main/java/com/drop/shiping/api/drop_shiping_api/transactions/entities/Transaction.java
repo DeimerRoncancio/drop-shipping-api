@@ -4,11 +4,12 @@ import com.drop.shiping.api.drop_shiping_api.users.entities.User;
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "transactions")
 public class Transaction {
     @Id
     @UuidGenerator
@@ -16,6 +17,11 @@ public class Transaction {
     private String id;
     private String reference;
     private Date transactionDate;
+    private String userNames;
+    private String userEmail;
+    private String userNumber;
+    private String userAddress;
+    private Long totalPrice;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "transaction")
     private List<ProductItem> products;
@@ -25,12 +31,8 @@ public class Transaction {
     private User user;
     private String userReference;
 
-    public Transaction() {}
-
-    public Transaction(String orderName, String notes, Date orderDate) {
-        this.reference = orderName;
-        this.transactionDate = orderDate;
-
+    public Transaction() {
+        products = new ArrayList<>();
     }
 
     public String getId() {
@@ -57,6 +59,46 @@ public class Transaction {
         this.transactionDate = orderDate;
     }
 
+    public String getUserNames() {
+        return userNames;
+    }
+
+    public void setUserNames(String userNames) {
+        this.userNames = userNames;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+    }
+
+    public String getUserNumber() {
+        return userNumber;
+    }
+
+    public void setUserNumber(String userNumber) {
+        this.userNumber = userNumber;
+    }
+
+    public String getUserAddress() {
+        return userAddress;
+    }
+
+    public void setUserAddress(String userAddress) {
+        this.userAddress = userAddress;
+    }
+
+    public Long getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(Long totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
     public List<ProductItem> getProducts() {
         return products;
     }
@@ -79,5 +121,18 @@ public class Transaction {
 
     public void setUserReference(String userReference) {
         this.userReference = userReference;
+    }
+
+    @Override
+    public String toString() {
+        return "Transaction{" +
+                "id='" + id + '\'' +
+                ", reference='" + reference + '\'' +
+                ", transactionDate=" + transactionDate +
+                ", totalPrice=" + totalPrice +
+                ", products=" + products +
+                ", user=" + user +
+                ", userReference='" + userReference + '\'' +
+                '}';
     }
 }
