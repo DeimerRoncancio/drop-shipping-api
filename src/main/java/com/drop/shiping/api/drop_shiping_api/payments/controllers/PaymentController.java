@@ -74,6 +74,12 @@ public class PaymentController {
     value = "/confirmation",
     consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<String> handleWebhook(@ModelAttribute EpaycoWebhookDTO request) {
+        System.out.println(
+                "Webhook recibido:" +
+                "cod=" + request.x_cod_response() +
+                "response=" + request.x_response() +
+                "tx=" + request.x_extra1()
+        );
         try {
             if (!paymentService.validateSignature(request))
                 return ResponseEntity.badRequest().body("Firma invalida");

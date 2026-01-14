@@ -22,6 +22,7 @@ public class Transaction {
     private String userNumber;
     private String userAddress;
     private Long totalPrice;
+    private String status;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "transaction")
     private List<ProductItem> products;
@@ -29,8 +30,8 @@ public class Transaction {
     @ManyToOne
     @JoinColumn(name = "id_user")
     private User user;
-    private String userReference;
 
+    private String userReference;
     public Transaction() {
         products = new ArrayList<>();
     }
@@ -38,15 +39,15 @@ public class Transaction {
     public String getId() {
         return id;
     }
-    
+
     public void setId(String id) {
         this.id = id;
     }
-    
+
     public String getReference() {
         return reference;
     }
-    
+
     public void setReference(String orderName) {
         this.reference = orderName;
     }
@@ -110,7 +111,7 @@ public class Transaction {
     public User getUser() {
         return user;
     }
-    
+
     public void setUser(User user) {
         this.user = user;
     }
@@ -121,6 +122,14 @@ public class Transaction {
 
     public void setUserReference(String userReference) {
         this.userReference = userReference;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     @Override

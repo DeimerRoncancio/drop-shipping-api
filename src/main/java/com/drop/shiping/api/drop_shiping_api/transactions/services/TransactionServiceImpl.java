@@ -9,26 +9,22 @@ import com.drop.shiping.api.drop_shiping_api.transactions.entities.ProductItem;
 import com.drop.shiping.api.drop_shiping_api.transactions.entities.Transaction;
 import com.drop.shiping.api.drop_shiping_api.transactions.mappers.TransactionMapper;
 import com.drop.shiping.api.drop_shiping_api.users.entities.User;
-import com.drop.shiping.api.drop_shiping_api.users.services.impl.UserServiceImpl;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.drop.shiping.api.drop_shiping_api.transactions.dtos.UpdateOrderDTO;
 import com.drop.shiping.api.drop_shiping_api.transactions.repositories.TransactionRepository;
 import com.drop.shiping.api.drop_shiping_api.users.repositories.UserRepository;
 
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static com.drop.shiping.api.drop_shiping_api.security.JwtConfig.SECRET_KEY;
 
@@ -65,6 +61,7 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = new Transaction();
         transaction.setTotalPrice(dto.totalPrice());
         transaction.setTransactionDate(dto.transactionDate());
+        transaction.setStatus("PROCESSING");
 
         dto.products().forEach(product -> {
             Optional<Product> productDB = productRepository.findById(product.productId());
@@ -84,13 +81,23 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    public Map<String, String> addUserInfo(String id, UserInfoDTO userDTO) {
+    public Map<String, String> addUserInfo(String userReference, HttpServletResponse response, String id, UserInfoDTO userDTO) {
         Transaction transaction = repository.findById(id).orElseThrow();
         String identifier = "";
 
-        if (userDTO.token() != null && !userDTO.token().isEmpty()) {
-            Claims claims = Jwts.parser().verifyWith(SECRET_KEY).build().parseSignedClaims(userDTO.token()).getPayload();
-            identifier = claims.getSubject();
+        if (userDTO.token() != null && !userDTO.token().isBlank()) {
+            try {
+                Claims claims = Jwts.parser()
+                        .verifyWith(SECRET_KEY)
+                        .build()
+                        .parseSignedClaims(userDTO.token())
+                        .getPayload();
+
+                identifier = claims.getSubject();
+
+            } catch (Exception e) {
+                identifier = "";
+            }
         }
 
         if (!identifier.isEmpty()) {
@@ -100,7 +107,19 @@ public class TransactionServiceImpl implements TransactionService {
 
             userOptional.ifPresent(transaction::setUser);
         } else {
-            transaction.setUserReference(UUID.randomUUID().toString());
+            if (userReference != null) {
+                transaction.setUserReference(userReference);
+            } else {
+                String reference = UUID.randomUUID().toString();
+                Cookie cookie = new Cookie("userReference", reference);
+                cookie.setHttpOnly(true);
+                cookie.setSecure(true);
+                cookie.setMaxAge(60 * 60 * 24 * 365);
+                cookie.setPath("/");
+                response.addCookie(cookie);
+
+                transaction.setUserReference(reference);
+            }
         }
 
         transaction.setUserEmail(userDTO.userEmail());
@@ -109,7 +128,12 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setUserAddress(userDTO.userAddress());
 
         repository.save(transaction);
-        return Map.of("userReference", transaction.getUserReference());
+        return Map.of(
+                "userReference",
+                Boolean.parseBoolean(transaction.getUserReference())
+                        ? transaction.getUserReference()
+                        : ""
+        );
     }
 
     @Override
@@ -118,27 +142,6 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = repository.findById(id).orElseThrow();
         List<Product> productList = productRepository.findAllById(productIds);
 
-        List<String> itemIds = transaction.getProducts().stream()
-                .map(ProductItem::getProduct)
-                .map(Product::getId).toList();
-
-        productList.stream()
-            .filter(product -> Optional.ofNullable(product.getId())
-                .map(item -> !itemIds.contains(item))
-                .orElse(false))
-            .forEach(product -> {
-                ProductItem productItem = new ProductItem();
-                productItem.setProduct(product);
-                productItem.setTransaction(transaction);
-                transaction.getProducts().add(productItem);
-                System.out.println(productItem.getId());
-            });
-
-        repository.save(transaction);
-
-//        List<ProductItem> itemsToRemove = transaction.getProducts()
-//                .stream().filter(p -> !productIds.contains(p.getProduct().getId()))
-//                .toList();
 
 
 //        transaction.getProducts().removeIf(p -> !productIds.contains(p.getProduct().getId()));
@@ -156,9 +159,9 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     public Optional<Transaction> delete(String id) {
-        Optional<Transaction> orderOptional = repository.findById(id);
-        orderOptional.ifPresent(repository::delete);
-        return orderOptional;
+        Optional<Transaction> transactionOp = repository.findById(id);
+        transactionOp.ifPresent(repository::delete);
+        return transactionOp;
     }
 
     public boolean isNumeric(String str) {

@@ -2,6 +2,8 @@ package com.drop.shiping.api.drop_shiping_api.transactions.controllers;
 
 import com.drop.shiping.api.drop_shiping_api.transactions.dtos.OrderResponseDTO;
 import com.drop.shiping.api.drop_shiping_api.transactions.dtos.UserInfoDTO;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import com.drop.shiping.api.drop_shiping_api.common.exceptions.NotFoundException;
 
@@ -60,15 +62,15 @@ public class TransactionController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, String>> addUserInfo(
-    @PathVariable("id") String id, @Valid @RequestBody UserInfoDTO userInfoDTO) {
-        return ResponseEntity.ok().body(service.addUserInfo(id, userInfoDTO));
+    @CookieValue(value = "userReference", required = false) String userReference,
+    HttpServletResponse response, @PathVariable("id") String id, @Valid @RequestBody UserInfoDTO dto) {
+        return ResponseEntity.ok().body(service.addUserInfo(userReference, response, id, dto));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<Void> delete(@PathVariable String id) {
-        Optional<Transaction> orderDb = service.delete(id);
-        orderDb.orElseThrow(() -> new NotFoundException("Order not found"));
+    public ResponseEntity<Void> delete(@PathVariable("id") String id) {
+        Optional<Transaction> transactionDb = service.delete(id);
+        transactionDb.orElseThrow(() -> new NotFoundException("Transaction not found"));
 
         return ResponseEntity.ok().build();
     }

@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -60,6 +61,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public void processWebhook(EpaycoWebhookDTO request) {
+        System.out.println(request.x_response().split(",")[0]);
         switch (request.x_response().split(",")[0].trim()) {
             case "Aceptada": processApprovedTransaction(request);
                 break;
@@ -80,7 +82,9 @@ public class PaymentServiceImpl implements PaymentService {
     private void processApprovedTransaction(EpaycoWebhookDTO request) {
         String transactionId = request.x_extra1().split(",")[0];
         transactionRepository.findById(transactionId).ifPresent(transaction -> {
+            if (Objects.equals(transaction.getStatus(), "APPROVED")) return;
             transaction.setReference(request.x_ref_payco().split(",")[0]);
+            transaction.setStatus("APPROVED");
             transactionRepository.save(transaction);
         });
     }
@@ -88,7 +92,9 @@ public class PaymentServiceImpl implements PaymentService {
     private void processRejectTransaction(EpaycoWebhookDTO request) {
         String transactionId = request.x_extra1().split(",")[0];
         transactionRepository.findById(transactionId).ifPresent(transaction -> {
+            if (transaction.getStatus() != null) return;
             transaction.setReference(request.x_ref_payco().split(",")[0]);
+            transaction.setStatus("REJECTED");
             transactionRepository.save(transaction);
         });
     }
@@ -96,7 +102,9 @@ public class PaymentServiceImpl implements PaymentService {
     private void processPendingTransaction(EpaycoWebhookDTO request) {
         String transactionId = request.x_extra1().split(",")[0];
         transactionRepository.findById(transactionId).ifPresent(transaction -> {
+            if (transaction.getStatus() != "") return;
             transaction.setReference(request.x_ref_payco().split(",")[0]);
+            transaction.setStatus("PENDING");
             transactionRepository.save(transaction);
         });
     }
@@ -104,9 +112,11 @@ public class PaymentServiceImpl implements PaymentService {
     private void processFailedTransaction(EpaycoWebhookDTO request) {
         String transactionId = request.x_extra1().split(",")[0];
         transactionRepository.findById(transactionId).ifPresent(transaction -> {
+            if (transaction.getStatus() != null) return;
             transaction.setReference(request.x_ref_payco().split(",")[0]);
             transactionRepository.save(transaction);
-        });    }
+        });
+    }
 
     private String bytesToHex(byte[] hash) {
         StringBuilder hexString = new StringBuilder();

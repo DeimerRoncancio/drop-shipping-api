@@ -9,6 +9,8 @@ import com.drop.shiping.api.drop_shiping_api.transactions.dtos.UserInfoDTO;
 import com.drop.shiping.api.drop_shiping_api.transactions.entities.Transaction;
 import com.drop.shiping.api.drop_shiping_api.transactions.dtos.NewTransactionDTO;
 import com.drop.shiping.api.drop_shiping_api.transactions.dtos.UpdateOrderDTO;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -19,7 +21,7 @@ public interface TransactionService {
 
     String createTransaction(NewTransactionDTO dto);
 
-    Map<String, String> addUserInfo(String id, UserInfoDTO dto);
+    Map<String, String> addUserInfo(String userReference, HttpServletResponse response, String id, UserInfoDTO dto);
 
     String updateProducts(String id, List<String> productIds);
 

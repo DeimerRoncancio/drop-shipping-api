@@ -56,6 +56,7 @@ public class SpringSecurityConfig {
             .requestMatchers(HttpMethod.POST, "/app/transactions").permitAll()
             .requestMatchers(HttpMethod.PUT, "/app/transactions/{identifier}").permitAll()
             .requestMatchers(HttpMethod.PUT, "/app/transactions/update-products/**").permitAll()
+            .requestMatchers(HttpMethod.DELETE, "/app/transactions/{id}").permitAll()
             .requestMatchers(HttpMethod.POST, "/app/payments/get-session").permitAll()
             .requestMatchers(HttpMethod.POST, "/app/payments/confirmation").permitAll()
             .anyRequest().authenticated())
