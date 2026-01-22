@@ -9,8 +9,10 @@ import com.drop.shiping.api.drop_shiping_api.products.mappers.VariantMapper;
 import com.drop.shiping.api.drop_shiping_api.products.services.ProductCategoryService;
 import com.drop.shiping.api.drop_shiping_api.products.services.ProductService;
 import com.drop.shiping.api.drop_shiping_api.products.services.VariantService;
+import com.drop.shiping.api.drop_shiping_api.products.specification.ProductSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -125,6 +127,28 @@ public class ProductServiceImpl implements ProductService {
 
             repository.delete(product);
             return product;
+        });
+    }
+
+    @Override
+    @Transactional
+    public Page<ProductResponseDTO> search(String name, String category, Pageable pageable) {
+        Specification<Product> spec = (root, query, cb) -> cb.conjunction();
+
+        if (name != null && !name.isEmpty())
+            spec = spec.and(ProductSpecification.hasProductName(name));
+
+        if (category != null && !category.isEmpty())
+            spec = spec.and(ProductSpecification.hasCategory(category));
+
+        Page<Product> products = repository.findAll(spec, pageable);
+
+        return products.map(product -> {
+            List<VariantDTO> variants = product.getVariants().stream().map(variant -> {
+                List<String> values = List.of(variant.getValues().split("\\|"));
+                return new VariantDTO(variant.getId(), variant.getName(), variant.getType(), variant.getTag(), values);
+            }).toList();
+            return ProductMapper.MAPPER.productToResponseDTO(product, variants);
         });
     }
 

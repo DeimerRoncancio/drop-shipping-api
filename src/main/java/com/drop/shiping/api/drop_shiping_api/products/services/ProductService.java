@@ -20,5 +20,7 @@ public interface ProductService {
 
     Optional<Product> delete(String id);
 
+    Page<ProductResponseDTO> search(String query, String category, Pageable pageable);
+
     Long productsSize();
 }
