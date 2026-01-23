@@ -1,5 +1,6 @@
 package com.drop.shiping.api.drop_shiping_api.products.services;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.drop.shiping.api.drop_shiping_api.products.dtos.ProductDTO;
@@ -20,7 +21,7 @@ public interface ProductService {
 
     Optional<Product> delete(String id);
 
-    Page<ProductResponseDTO> search(String query, String category, Pageable pageable);
+    Page<ProductResponseDTO> search(String query, List<String> category, Pageable pageable);
 
     Long productsSize();
 }

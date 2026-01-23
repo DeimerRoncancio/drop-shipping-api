@@ -17,6 +17,7 @@ import com.drop.shiping.api.drop_shiping_api.products.services.ProductService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -71,7 +72,7 @@ public class ProductController {
     @GetMapping("/query")
     public Page<ProductResponseDTO> findByName(
     @PageableDefault Pageable pageable, @RequestParam(value = "name", required = false) String name,
-    @RequestParam(value = "category", required = false) String category) {
-        return service.search(name, category, pageable);
+    @RequestParam(value = "categories", required = false) List<String> categories) {
+        return service.search(name, categories, pageable);
     }
 }
