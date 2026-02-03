@@ -61,6 +61,7 @@ public class SpringSecurityConfig {
             .requestMatchers(HttpMethod.DELETE, "/app/transactions/{id}").permitAll()
             .requestMatchers(HttpMethod.POST, "/app/payments/get-session").permitAll()
             .requestMatchers(HttpMethod.POST, "/app/payments/confirmation").permitAll()
+            .requestMatchers(HttpMethod.POST, "/app/send-email").permitAll()
             .anyRequest().authenticated())
             .addFilter(new JwtAuthenticationFilter(authenticationManager()))
             .addFilter(new JwtValidationFilter(authenticationManager()))

@@ -1,7 +1,6 @@
 package com.drop.shiping.api.drop_shiping_api.users.controllers;
 
 import com.drop.shiping.api.drop_shiping_api.common.exceptions.NotFoundException;
-import com.drop.shiping.api.drop_shiping_api.images.entities.Image;
 import com.drop.shiping.api.drop_shiping_api.users.dtos.PasswordDTO;
 import com.drop.shiping.api.drop_shiping_api.users.dtos.UserDTO;
 import com.drop.shiping.api.drop_shiping_api.users.dtos.UserResponseDTO;
@@ -13,7 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.drop.shiping.api.drop_shiping_api.users.entities.User;
 import com.drop.shiping.api.drop_shiping_api.users.services.UserService;
