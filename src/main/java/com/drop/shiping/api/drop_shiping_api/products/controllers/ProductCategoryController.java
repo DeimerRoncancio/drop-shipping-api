@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import com.drop.shiping.api.drop_shiping_api.common.exceptions.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,7 +38,8 @@ public class ProductCategoryController {
     }
 
     @GetMapping
-    public Page<CategoryResponseDTO> viewAll(@PageableDefault Pageable pageable) {
+    public Page<CategoryResponseDTO> viewAll(
+    @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return service.findAll(pageable);
     }
 

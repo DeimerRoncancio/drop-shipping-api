@@ -23,8 +23,6 @@ public record ProductResponseDTO(
 
     List<VariantDTO> variants,
 
-    LocalDateTime createdAt,
-
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     List<MultipartFile> images,
 

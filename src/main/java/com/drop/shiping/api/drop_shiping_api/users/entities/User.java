@@ -15,6 +15,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.Entity;
@@ -51,6 +52,9 @@ public class User {
     private List<Role> roles;
     private boolean admin;
     private boolean enabled;
+
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @PrePersist
     public void prePersist() {
@@ -134,13 +138,6 @@ public class User {
         this.transactions = transactions;
     }
 
-    public void addTransaction(List<Transaction> order) {
-        order.forEach(ord -> {
-            ord.setUser(this);
-            transactions.add(ord);
-        });
-    }
-
     public List<Role> getRoles() {
         return roles;
     }
@@ -163,6 +160,10 @@ public class User {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     @Override

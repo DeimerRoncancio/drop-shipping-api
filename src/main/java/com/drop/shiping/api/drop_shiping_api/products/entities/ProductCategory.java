@@ -3,6 +3,7 @@ package com.drop.shiping.api.drop_shiping_api.products.entities;
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -18,6 +19,9 @@ public class ProductCategory {
 
     @ManyToMany(mappedBy = "categories")
     private List<Product> products;
+
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     public ProductCategory() {
     }
@@ -48,5 +52,9 @@ public class ProductCategory {
 
     public void setProducts(List<Product> products) {
         this.products = products;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }

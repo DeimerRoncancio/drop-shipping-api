@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,13 +36,15 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<UserResponseDTO> viewAll(@PageableDefault Pageable pageable) {
+    public Page<UserResponseDTO> viewAll(@PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return service.findAll(pageable);
     }
 
     @GetMapping("/by-role")
     @PreAuthorize("hasRole('ADMIN')")
-    public Page<UserResponseDTO> viewByRole(@PageableDefault Pageable pageable, @RequestParam("isAdmin") boolean isAdmin) {
+    public Page<UserResponseDTO> viewByRole(
+    @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+    @RequestParam("isAdmin") boolean isAdmin) {
         return service.findByRole(pageable, isAdmin);
     }
 
