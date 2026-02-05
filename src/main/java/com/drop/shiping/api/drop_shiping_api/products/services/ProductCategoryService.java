@@ -1,6 +1,7 @@
 package com.drop.shiping.api.drop_shiping_api.products.services;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.drop.shiping.api.drop_shiping_api.products.dtos.ProductCategoryDTO;
@@ -25,4 +26,6 @@ public interface ProductCategoryService {
     Long categoriesSize();
 
     List<ProductCategoryDTO> latestCategories();
+
+    Map<String, Long> categoriesStats();
 }

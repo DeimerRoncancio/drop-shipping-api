@@ -26,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -82,5 +83,11 @@ public class ProductCategoryController {
     @PreAuthorize("hasRole('ADMIN')")
     public List<ProductCategoryDTO> findLatestCategories() {
         return service.latestCategories();
+    }
+
+    @GetMapping("/stats")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Long>> findStats() {
+        return ResponseEntity.ok().body(service.categoriesStats());
     }
 }

@@ -14,7 +14,9 @@ import com.drop.shiping.api.drop_shiping_api.products.repositories.ProductCatego
 
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -98,6 +100,17 @@ public class ProductCategoryServiceImpl implements ProductCategoryService {
     @Transactional(readOnly = true)
     public Long categoriesSize() {
         return repository.count();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, Long> categoriesStats(){
+        Map<String, Long> categoriesStats = new HashMap<>();
+
+        categoriesStats.put("totalCategories", categoriesSize());
+        categoriesStats.put("obsoleteCategories", repository.countObsoleteCategories());
+
+        return categoriesStats;
     }
 
     @Override

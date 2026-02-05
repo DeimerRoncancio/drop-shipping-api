@@ -20,4 +20,7 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     Page<Product> findByProductNameOrCategories(String query, List<String> categories, Pageable pageable);
 
     List<Product> findTop5ByOrderByCreatedAtDesc();
+
+    @Query("SELECT COUNT(DISTINCT p) FROM Product p JOIN p.variants v")
+    long countProductsWithVariants();
 }
