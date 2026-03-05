@@ -116,6 +116,10 @@ public class TransactionController {
                 transaction.reference(),
                 transaction.status(),
                 transaction.transactionDate(),
+                transaction.userNames(),
+                transaction.userEmail(),
+                transaction.userNumber(),
+                transaction.userAddress(),
                 transaction.totalPrice(),
                 newProducts
         );

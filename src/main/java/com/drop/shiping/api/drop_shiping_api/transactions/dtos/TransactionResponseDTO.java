@@ -12,6 +12,10 @@ public record TransactionResponseDTO(
     String reference,
     String status,
     Date transactionDate,
+    String userNames,
+    String userEmail,
+    String userNumber,
+    String userAddress,
     Long totalPrice,
 
     List<ItemResponseDTO> products
